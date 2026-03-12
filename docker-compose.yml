@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  adselfer:
+    build: 
+      context: ./adselfer-app
+      dockerfile: Dockerfile
+    container_name: adselfer-custom-sspr
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./adselfer-app/config/.env:/app/config/.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  default:
+    name: adselfer-network

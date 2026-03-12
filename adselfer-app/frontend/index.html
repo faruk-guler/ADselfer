@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADselfer - Şifre Sıfırlama Portalı</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <div class="container">
+        <div class="card" id="app">
+            <header>
+                <h1>ADselfer</h1>
+                <p>Güvenli Şifre Sıfırlama Portalı</p>
+            </header>
+
+            <!-- Step 1: User Lookup -->
+            <div id="step-1" class="step active">
+                <div class="input-group">
+                    <label for="username">Kullanıcı Adı</label>
+                    <input type="text" id="username" placeholder="Örn: ahmet.yilmaz">
+                </div>
+                <button onclick="lookupUser()" id="btn-lookup">Devam Et</button>
+            </div>
+
+            <!-- Step 2: Verification -->
+            <div id="step-2" class="step">
+                <p class="info">Lütfen <span id="email-hint"></span> adresine gönderilen kodu ve güvenlik cevabınızı girin.</p>
+                <div class="input-group">
+                    <label for="otp">Doğrulama Kodu</label>
+                    <input type="text" id="otp" maxlength="6" placeholder="000000">
+                </div>
+                <div class="input-group">
+                    <label id="label-question">Güvenlik Sorusu</label>
+                    <input type="text" id="answer" placeholder="Cevabınız">
+                </div>
+                <button onclick="verifyUser()">Doğrula</button>
+            </div>
+
+            <!-- Step 3: New Password -->
+            <div id="step-3" class="step">
+                <div class="input-group">
+                    <label for="new-password">Yeni Şifre</label>
+                    <input type="password" id="new-password" placeholder="••••••••">
+                </div>
+                <div class="input-group">
+                    <label for="confirm-password">Şifre Tekrar</label>
+                    <input type="password" id="confirm-password" placeholder="••••••••">
+                </div>
+                <button onclick="resetPassword()">Şifreyi Güncelle</button>
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-screen" class="step">
+                <div class="success-icon">✓</div>
+                <h2>Başarılı!</h2>
+                <p>Şifreniz güncellendi. Artık yeni şifrenizle giriş yapabilirsiniz.</p>
+                <button onclick="location.reload()">Giriş Sayfasına Dön</button>
+            </div>
+
+            <div id="loader" class="loader-hidden"></div>
+            <p id="error-msg" class="error"></p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
