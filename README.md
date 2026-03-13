@@ -74,3 +74,8 @@ Kullanıcıların bulunduğu OU üzerinde sağ tıklayın -> **Delegate Control*
 
 ---
 **ADselfer** projesi, güvenliğiniz ve kullanım kolaylığınız ön planda tutularak tasarlandırılmıştır.
+
+## 📄 License
+Apache 2.0
+
+---
