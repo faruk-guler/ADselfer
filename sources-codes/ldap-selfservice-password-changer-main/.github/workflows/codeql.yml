@@ -1,0 +1,76 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Run weekly on Sundays at 00:00 UTC
+    - cron: "0 0 * * 0"
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze Code
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: go
+            build-mode: autobuild
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        if: matrix.language == 'go'
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: "1.26"
+          check-latest: true
+          cache: true
+
+      - name: Install pnpm
+        if: matrix.language == 'javascript-typescript'
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+
+      - name: Set up Node.js
+        if: matrix.language == 'javascript-typescript'
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Install dependencies
+        if: matrix.language == 'javascript-typescript'
+        run: pnpm install --frozen-lockfile
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: +security-and-quality
+          config: |
+            paths-ignore:
+              - '**/*.md'
+              - 'docs/**'
+              - 'claudedocs/**'
+              - '**/test/**'
+              - '**/*_test.go'
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@0d579ffd059c29b07949a3cce3983f0780820c98 # v4.32.6
+        with:
+          category: "/language:${{ matrix.language }}"

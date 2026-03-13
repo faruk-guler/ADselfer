@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  adselfer:
+    build: .
+    container_name: adselfer-app
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/audit.log:/app/backend/audit.log
+      - ./config/.env:/app/config/.env
+    restart: always
+    environment:
+      - NODE_ENV=production

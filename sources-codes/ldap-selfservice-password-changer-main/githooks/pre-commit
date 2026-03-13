@@ -1,0 +1,64 @@
+#!/bin/bash
+# Pre-commit hook - runs fast checks before commit
+# Install: cp githooks/* .git/hooks/ && chmod +x .git/hooks/*
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Format check (fast)
+if command -v pnpm >/dev/null 2>&1; then
+  echo "→ Checking code formatting..."
+  pnpm prettier --check . || {
+    echo "❌ Formatting check failed. Run: pnpm prettier --write ."
+    exit 1
+  }
+fi
+
+# TypeScript check (fast)
+if [ -f package.json ] && command -v pnpm >/dev/null 2>&1; then
+  echo "→ Checking TypeScript types..."
+  pnpm js:build || {
+    echo "❌ TypeScript check failed"
+    exit 1
+  }
+fi
+
+# ESLint check
+if [ -f package.json ] && command -v pnpm >/dev/null 2>&1; then
+  echo "→ Running ESLint..."
+  pnpm lint || {
+    echo "⚠️  ESLint found issues. Run: pnpm lint:fix"
+  }
+fi
+
+# golangci-lint
+if [ -f go.mod ] && command -v golangci-lint >/dev/null 2>&1; then
+  echo "→ Running golangci-lint..."
+  golangci-lint run --timeout=2m || {
+    echo "⚠️  golangci-lint found issues"
+    echo "Run: golangci-lint run"
+  }
+fi
+
+# Go vet (backup if golangci-lint not installed)
+if [ -f go.mod ] && command -v go >/dev/null 2>&1; then
+  if ! command -v golangci-lint >/dev/null 2>&1; then
+    echo "→ Running go vet..."
+    go vet ./... || {
+      echo "❌ Go vet failed"
+      exit 1
+    }
+  fi
+fi
+
+# Go tests (fast mode with -short flag)
+if [ -f go.mod ] && command -v go >/dev/null 2>&1; then
+  echo "→ Running Go tests (fast mode)..."
+  go test -short ./... || {
+    echo "❌ Go tests failed"
+    exit 1
+  }
+fi
+
+echo "✅ Pre-commit checks passed"

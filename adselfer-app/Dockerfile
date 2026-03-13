@@ -16,4 +16,6 @@ COPY config ./config
 EXPOSE 3000
 
 # Start application
+# Ensure audit.log exists for volume mapping if needed
+RUN touch backend/audit.log
 CMD ["node", "backend/server.js"]

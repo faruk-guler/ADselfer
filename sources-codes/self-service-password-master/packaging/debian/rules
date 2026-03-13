@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+
+export DH_VERBOSE=1
+export DH_COMPAT=11
+
+%:
+	dh $@
+
+override_dh_install:
+	dh_install
+	debian/replace_cache_dirs
+
+override_dh_fixperms:
+	dh_fixperms
+	chown www-data:www-data debian/self-service-password/var/cache/self-service-password/cache
+	chown www-data:www-data debian/self-service-password/var/cache/self-service-password/templates_c
+
+override_dh_builddeb:
+	dh_builddeb -- -Zxz
+
+override_dh_auto_test:
+	dh_auto_test
+	if type ../vendor/bin/phpunit ; then ../vendor/bin/phpunit ../tests --configuration ../tests/phpunit.xml; fi

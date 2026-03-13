@@ -1,0 +1,45 @@
+Source: ltb-project-self-service-password
+Section: web
+Priority: extra
+Maintainer: Clement Oudot <clem@ltb-project.org>
+Uploaders: Felix Bartels <felix@host-consultants.de>
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.8.3
+Homepage: http://ltb-project.org/wiki/documentation/self-service-password
+
+Package: self-service-password
+Depends: php (>= 7.3), php-gd, php-ldap, php-mbstring, sed, smarty4 | smarty3
+Architecture: all
+Description: LDAP password change web interface
+ Self Service Password is a simple PHP application that allows users to change their password on an LDAP directory.
+ Self Service Password is provided by LDAP Tool Box project: http://ltb-project.org
+ Self Service Password bundles some dependencies:
+ - fontawesome-fonts = 6.5.1
+ - js-bootstrap = 5.3.3
+ - js-jquery = 3.7.1
+ - js-jquery-selectunique = 0.1.0
+ - php-bjeavons-zxcvbn-php = 1.3.1
+ - php-defuse-php-encryption = 2.4.0
+ - php-gregwar-captcha = 1.2.1
+ - php-guzzlehttp-guzzle = 7.8.1
+ - php-guzzlehttp-promises = 2.0.2
+ - php-guzzlehttp-psr7 = 2.6.2
+ - php-ltb-project-ltb-common = 0.3.0
+ - php-mxrxdxn-pwned-passwords = 2.1.0
+ - php-phpmailer = 6.9.1
+ - php-psr-http-client = 1.0.3
+ - php-psr-http-factory = 1.0.2
+ - php-psr-http-message = 2.0
+ - php-ralouphie-getallheaders = 3.0.3
+ - php-symfony-deprecation-contracts = 2.5.1
+ - php-symfony-finder = 7.0.0
+ - php-symfony-polyfill = v1.31.0
+ - php-symfony-deprecation-contracts = v2.5.3
+ - php-symfony-var-exporter = v5.4.40
+ - php-psr-container = 1.1.2
+ - php-symfony-service-contracts = v2.5.3
+ - php-psr-cache = 1.0.1
+ - php-symfony-cache-contracts = v2.5.3
+ - php-psr-log = 1.1.4
+ - php-symfony-cache = v5.4.42
+ - php-predis-predis = v2.2.2

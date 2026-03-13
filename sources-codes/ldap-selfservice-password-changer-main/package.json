@@ -1,0 +1,44 @@
+{
+  "name": "@netresearch/ldap-selfservice-password-changer",
+  "type": "module",
+  "author": "DevMiner <devminer@devminer.xyz>",
+  "license": "MIT",
+  "packageManager": "pnpm@10.32.1",
+  "scripts": {
+    "start": "pnpm build:assets && go run .",
+    "dev": "pnpm build:assets && (pnpm js:dev & pnpm css:dev & air)",
+    "build": "pnpm build:assets && go build",
+    "build:assets": "tsc & postcss ./internal/web/tailwind.css -o ./internal/web/static/styles.css & wait",
+    "js:build": "tsc",
+    "js:dev": "tsc -w --preserveWatchOutput",
+    "css:build": "postcss ./internal/web/tailwind.css -o ./internal/web/static/styles.css",
+    "css:dev": "pnpm css:build -w",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.0",
+    "@tailwindcss/postcss": "^4.1.18",
+    "autoprefixer": "^10.4.24",
+    "cssnano": "^7.1.2",
+    "eslint": "^10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "postcss": "^8.5.6",
+    "postcss-cli": "^11.0.1",
+    "postcss-nested": "^7.0.2",
+    "prettier": "^3.8.1",
+    "prettier-plugin-go-template": "^0.0.15",
+    "prettier-plugin-tailwindcss": "^0.7.2",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@tailwindcss/oxide"
+    ],
+    "overrides": {
+      "minimatch@<10.2.1": "^10.2.1"
+    }
+  }
+}

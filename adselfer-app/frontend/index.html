@@ -12,53 +12,132 @@
     
     <div class="container">
         <div class="card" id="app">
+            <nav class="tabs">
+                <button onclick="switchTab('reset')" class="tab-btn active" id="tab-reset">Sıfırla</button>
+                <button onclick="switchTab('profile')" class="tab-btn" id="tab-profile">Profilim</button>
+                <button onclick="switchTab('about')" class="tab-btn" id="tab-about">Hakkında</button>
+                <button onclick="switchTab('admin')" class="tab-btn" id="tab-admin">Yönetici</button>
+            </nav>
+
             <header>
                 <h1>ADselfer</h1>
-                <p>Güvenli Şifre Sıfırlama Portalı</p>
+                <p id="sub-title">Güvenli Şifre Sıfırlama Portalı</p>
             </header>
 
-            <!-- Step 1: User Lookup -->
-            <div id="step-1" class="step active">
-                <div class="input-group">
-                    <label for="username">Kullanıcı Adı</label>
-                    <input type="text" id="username" placeholder="Örn: ahmet.yilmaz">
+            <!-- Reset Flow Section -->
+            <div id="reset-section">
+                <!-- Step 1: User Lookup -->
+                <div id="step-1" class="step active">
+                    <div class="input-group">
+                        <label for="username">Kullanıcı Adı</label>
+                        <input type="text" id="username" placeholder="ahmet.yilmaz">
+                    </div>
+                    <button onclick="lookupUser()">Devam Et</button>
                 </div>
-                <button onclick="lookupUser()" id="btn-lookup">Devam Et</button>
+
+                <!-- Step 2: Verification -->
+                <div id="step-2" class="step">
+                    <p class="info">Lütfen <span id="email-hint">...</span> adresine gelen kodu ve güvenlik cevabını girin.</p>
+                    <div class="input-group">
+                        <label for="otp">Doğrulama Kodu</label>
+                        <input type="text" id="otp" maxlength="6" placeholder="000000">
+                    </div>
+                    <div class="input-group">
+                        <label>Güvenlik Sorusu Cevabı</label>
+                        <input type="text" id="answer" placeholder="Cevabınız">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="verifyUser()" style="flex: 2;">Doğrula & Sıfırla</button>
+                        <button onclick="unlockAccount()" class="btn-secondary" style="flex: 1;">Kilidi Aç</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: New Password -->
+                <div id="step-3" class="step">
+                    <div class="input-group">
+                        <label for="new-password">Yeni Şifre</label>
+                        <input type="password" id="new-password" placeholder="••••••••">
+                    </div>
+                    <div class="input-group">
+                        <label for="confirm-password">Şifre Tekrar</label>
+                        <input type="password" id="confirm-password" placeholder="••••••••">
+                    </div>
+                    <div id="password-policy-checklist" class="policy-checklist">
+                        <p>Şifre Kriterleri:</p>
+                        <ul>
+                            <li id="rule-length">Min 8 karakter</li>
+                            <li id="rule-upper">Büyük harf</li>
+                            <li id="rule-lower">Küçük harf</li>
+                            <li id="rule-number">Rakam</li>
+                            <li id="rule-special">Özel karakter</li>
+                        </ul>
+                    </div>
+                    <button onclick="resetPassword()" id="btn-submit-reset" disabled>Şifreyi Güncelle</button>
+                </div>
             </div>
 
-            <!-- Step 2: Verification -->
-            <div id="step-2" class="step">
-                <p class="info">Lütfen <span id="email-hint"></span> adresine gönderilen kodu ve güvenlik cevabınızı girin.</p>
-                <div class="input-group">
-                    <label for="otp">Doğrulama Kodu</label>
-                    <input type="text" id="otp" maxlength="6" placeholder="000000">
+            <!-- Profile Section -->
+            <div id="profile-section" style="display: none;">
+                <div id="profile-login" class="step active">
+                    <p class="info">Güvenlik bilgileriniz için giriş yapın.</p>
+                    <div class="input-group">
+                        <input type="text" id="prof-username" placeholder="Kullanıcı Adı">
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="prof-password" placeholder="Mevcut Şifre">
+                    </div>
+                    <button onclick="loginProfile()">Giriş Yap</button>
                 </div>
-                <div class="input-group">
-                    <label id="label-question">Güvenlik Sorusu</label>
-                    <input type="text" id="answer" placeholder="Cevabınız">
+                <div id="profile-setup" class="step">
+                    <div class="input-group">
+                        <label>Güvenlik Sorusu Cevabı</label>
+                        <input type="text" id="new-answer" placeholder="Cevabınız">
+                    </div>
+                    <button onclick="setupProfile()">Kaydet</button>
                 </div>
-                <button onclick="verifyUser()">Doğrula</button>
             </div>
 
-            <!-- Step 3: New Password -->
-            <div id="step-3" class="step">
-                <div class="input-group">
-                    <label for="new-password">Yeni Şifre</label>
-                    <input type="password" id="new-password" placeholder="••••••••">
+            <!-- About Section -->
+            <div id="about-section" style="display: none;">
+                <div class="step active">
+                    <p class="info" style="text-align: left;">
+                        <strong>ADselfer v3.0 (Massive Build)</strong><br><br>
+                        Bu araç Active Directory ortamları için geliştirilmiş profesyonel bir SSPR çözümüdür.<br><br>
+                        • <strong>Reset:</strong> OTP ve Güvenlik Sorusu ile şifre sıfırlama.<br>
+                        • <strong>Unlock:</strong> Şifre değiştirmeden hesap kilidi açma.<br>
+                        • <strong>Profile:</strong> Güvenlik cevabı belirleme.<br>
+                        • <strong>Admin:</strong> Denetim kayıtları ve sistem takibi.
+                    </p>
                 </div>
-                <div class="input-group">
-                    <label for="confirm-password">Şifre Tekrar</label>
-                    <input type="password" id="confirm-password" placeholder="••••••••">
+            </div>
+
+            <!-- Admin Section -->
+            <div id="admin-section" style="display: none;">
+                <div id="admin-login" class="step active">
+                    <p class="info">Yönetici yetkilendirmesi gereklidir.</p>
+                    <div class="input-group">
+                        <input type="text" id="admin-user" placeholder="Yönetici Adı">
+                    </div>
+                    <div class="input-group">
+                        <input type="password" id="admin-pass" placeholder="Şifre">
+                    </div>
+                    <button onclick="loginAdmin()">Yönetici Girişi</button>
                 </div>
-                <button onclick="resetPassword()">Şifreyi Güncelle</button>
+                <div id="admin-dashboard" class="step">
+                    <div style="text-align: left;">
+                        <h3 style="font-size: 0.9rem; margin-bottom: 10px;">Audit Logs</h3>
+                        <div id="log-container" class="log-viewer">Yükleniyor...</div>
+                        <button onclick="loadLogs()" class="btn-secondary" style="width: auto; padding: 6px 12px;">Yenile</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Success Message -->
             <div id="success-screen" class="step">
                 <div class="success-icon">✓</div>
                 <h2>Başarılı!</h2>
-                <p>Şifreniz güncellendi. Artık yeni şifrenizle giriş yapabilirsiniz.</p>
-                <button onclick="location.reload()">Giriş Sayfasına Dön</button>
+                <p id="success-desc">İşleminiz başarıyla tamamlandı.</p>
+                <button onclick="location.reload()">Başa Dön</button>
             </div>
 
             <div id="loader" class="loader-hidden"></div>

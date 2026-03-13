@@ -1,0 +1,297 @@
+name: Check
+
+on:
+  release:
+    types: [published]
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  go-test:
+    name: Run Go tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: "1.26"
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install && go mod download
+
+      - name: Check types
+        run: pnpm build:assets
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test with coverage
+        run: go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.out
+          flags: backend,unittests
+          name: go-coverage
+          fail_ci_if_error: false
+
+  integration-test:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      openldap:
+        image: osixia/openldap:1.5.0
+        ports:
+          - 1389:389
+        env:
+          LDAP_ORGANISATION: Example Inc
+          LDAP_DOMAIN: example.com
+          LDAP_ADMIN_PASSWORD: adminpassword
+        options: >-
+          --health-cmd "ldapsearch -x -H ldap://localhost:389 -b 'dc=example,dc=com' -D 'cn=admin,dc=example,dc=com' -w adminpassword"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      mailhog:
+        image: mailhog/mailhog:v1.0.1
+        ports:
+          - 1025:1025
+          - 8025:8025
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: "1.26"
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install && go mod download
+
+      - name: Build assets
+        run: pnpm build:assets
+
+      - name: Run integration tests with coverage
+        run: go test -v -race -tags=integration -coverprofile=coverage-integration.out -covermode=atomic ./...
+        env:
+          LDAP_SERVER: ldap://localhost:1389
+          LDAP_BASE_DN: dc=example,dc=com
+          LDAP_READONLY_USER: cn=admin,dc=example,dc=com
+          LDAP_READONLY_PASSWORD: adminpassword
+          SMTP_HOST: localhost
+          SMTP_PORT: "1025"
+
+      - name: Upload integration coverage to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage-integration.out
+          flags: backend,integration
+          name: go-integration-coverage
+          fail_ci_if_error: false
+
+  e2e-test:
+    name: Run E2E tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: "1.26"
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install && go mod download
+
+      - name: Build assets
+        run: pnpm build:assets
+
+      - name: Run E2E tests with coverage
+        run: go test -v -race -tags=e2e -coverprofile=coverage-e2e.out -covermode=atomic ./e2e/...
+
+      - name: Upload E2E coverage to Codecov
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage-e2e.out
+          flags: backend,e2e
+          name: go-e2e-coverage
+          fail_ci_if_error: false
+
+  fuzz-test:
+    name: Fuzz tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: "1.26"
+
+      - name: Run fuzz tests (quick)
+        run: |
+          go test -run=^$ -fuzz=FuzzValidateNewPassword -fuzztime=10s ./internal/rpchandler/...
+          go test -run=^$ -fuzz=FuzzPluralize -fuzztime=10s ./internal/rpchandler/...
+          go test -run=^$ -fuzz=FuzzValidateEmailAddress -fuzztime=10s ./internal/email/...
+
+  types:
+    name: Check types
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check types
+        run: pnpm js:build
+
+  formatting:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Check formatting
+        run: pnpm prettier --check .
+
+  lint-go:
+    name: Lint Go code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Set up Go
+        uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6.3.0
+        with:
+          go-version: "1.26"
+          cache: true
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build assets
+        run: pnpm build:assets
+
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
+        with:
+          version: latest
+          args: --timeout=5m
+
+  lint-js:
+    name: Lint TypeScript/JavaScript
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        name: Install pnpm
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run ESLint
+        run: pnpm lint

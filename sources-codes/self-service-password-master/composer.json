@@ -1,0 +1,41 @@
+{
+    "require": {
+        "ltb-project/ltb-common": "v0.5.0",
+        "bjeavons/zxcvbn-php": "^1.0",
+        "twbs/bootstrap": "v5.3.3",
+        "defuse/php-encryption": "2.4.0",
+        "gregwar/captcha": "v1.2.1",
+        "mxrxdxn/pwned-passwords": "v2.1.0",
+        "components/jquery": "v3.7.1",
+        "fortawesome/font-awesome": "6.5.1",
+        "symfony/cache": "v5.4.42"
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "rm -rf htdocs/vendor/bootstrap",
+            "cp -R vendor/twbs/bootstrap/dist htdocs/vendor/bootstrap",
+            "rm -rf htdocs/vendor/bootstrap/site htdocs/vendor/bootstrap/js/bootstrap.bundle* htdocs/vendor/bootstrap/js/bootstrap.esm* htdocs/vendor/bootstrap/js/bootstrap.js*  htdocs/vendor/bootstrap/package-lock.json htdocs/vendor/bootstrap/scss",
+            "rm -rf vendor/twbs/bootstrap",
+            "rm -rf htdocs/vendor/jquery",
+            "cp -R vendor/components/jquery htdocs/vendor/jquery",
+            "rm -rf vendor/components/jquery",
+            "rm -rf htdocs/vendor/font-awesome",
+            "cp -R vendor/fortawesome/font-awesome htdocs/vendor/font-awesome",
+            "rm -rf htdocs/vendor/font-awesome/js htdocs/vendor/font-awesome/js-packages htdocs/vendor/font-awesome/less htdocs/vendor/font-awesome/metadata htdocs/vendor/font-awesome/otfs htdocs/vendor/font-awesome/scss htdocs/vendor/font-awesome/sprites htdocs/vendor/font-awesome/svgs",
+            "rm -rf vendor/fortawesome/font-awesome",
+            "cp -f vendor/ltb-project/ltb-common/src/ppolicy/html/policy.tpl templates/policy.tpl",
+            "cp -f vendor/ltb-project/ltb-common/src/ppolicy/js/ppolicy.js htdocs/js/ppolicy.js",
+            "cp -f vendor/ltb-project/ltb-common/src/ppolicy/css/ppolicy.css htdocs/css/ppolicy.css"
+        ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": ">=8",
+        "php-mock/php-mock-phpunit": "*",
+        "mockery/mockery": ">=1.4"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4"
+        }
+    }
+}
